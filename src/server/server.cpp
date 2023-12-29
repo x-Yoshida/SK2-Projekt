@@ -1,37 +1,36 @@
 #include "server.h"
 
+pthread_t connt;
+bool done = false;
 int main(int argc,char** argv)
 {
     if(argc != 2) error(1, 0, "Need 1 arg (port)");
     uint16_t port = readPort(argv[1]);
-    
+    pthread_create(&connt,NULL,connectionCheck,NULL);
     signal(SIGINT, ctrl_c);
     signal(SIGPIPE, SIG_IGN);
-    
+
     int epollFd = epoll_create1(0);
     servHandler = new Server(epollFd,port);
-    
+
     setReuseAddr(servHandler->sock());
     epoll_event ee {EPOLLIN, {.ptr=servHandler}};
     epoll_ctl(epollFd, EPOLL_CTL_ADD, servHandler->sock(), &ee);
     
     while(true){
-        int n = epoll_wait(epollFd, &ee, 1, 5000);
+        int n = epoll_wait(epollFd, &ee, 1, -1);
         if(n==-1) 
         {
-            error(0,errno,"epoll_wait failed");
-            ctrl_c(SIGINT);
+            if(0)
+            {
+                error(0,errno,"epoll_wait failed");
+                ctrl_c(SIGINT);
+            }
 
         }
         if(n==0)
         {
-            //https://linux.die.net/man/2/alarm
-            //https://linux.die.net/man/2/setitimer
-            //Will need to do one of rhose probably
-            for(Client* c : clients)
-            {
-                c->write("Test\n",6);
-            }
+            //connectionCheck();
         }
         else
         {
@@ -63,6 +62,8 @@ void ctrl_c(int)
         delete client;
     //close(servFd);
     delete servHandler;
+    done=true;
+    pthread_join(connt,NULL);
     printf("Closing server\n");
     exit(0);
 }
@@ -76,4 +77,31 @@ void sendToAllBut(int fd, char * buffer, int count)
         if(client->fd()!=fd)
             client->write(buffer, count);
     }
+}
+
+void* connectionCheck(void* arg)
+{
+    while(!done)
+    {
+        sleep(1);
+        std::list<Client*> toDelete;
+        for(Client* c : clients)
+        {
+            c->timeoutCounterUp();
+            c->write("Test\n",6);
+            printf("%d\n",c->getTimeoutCounter());
+            if(c->getTimeoutCounter()>5)
+            {
+                toDelete.push_back(c);
+            }
+        }
+        for(Client* c : toDelete)
+        {
+            printf("Bruh\n");
+            c->remove();
+        }
+        
+
+    }
+    return NULL;
 }

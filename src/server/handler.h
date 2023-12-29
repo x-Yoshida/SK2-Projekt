@@ -27,14 +27,16 @@ class Client : public Handler
 {
     int _fd;
     int _epollFd;
+    int _timeoutCounter=0;
     public:
         Client(int fd,int epollfd);
         virtual ~Client();
         int fd() const;
         virtual void handleEvent(uint32_t events) override;
+        void timeoutCounterUp();
+        int getTimeoutCounter();
         void write(char * buffer, int count);
         void remove();
-
 };
 
 class Server : public Handler {

@@ -9,8 +9,12 @@
 #include <error.h>
 #include <netdb.h>
 #include <sys/epoll.h>
+#include <sys/time.h>
 #include <unordered_set>
+#include <list>
 #include <signal.h>
+#include <pthread.h>
+
 
 #include "handler.h"
 
@@ -26,5 +30,6 @@ uint16_t readPort(char * txt);
 
 void setReuseAddr(int sock);
 
+void* connectionCheck(void* arg);
 
 

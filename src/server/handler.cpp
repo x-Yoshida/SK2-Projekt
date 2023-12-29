@@ -30,6 +30,17 @@ void Client::handleEvent(uint32_t events)
         remove();
     }
 }
+
+void Client::timeoutCounterUp()
+{
+    _timeoutCounter++;
+}
+
+int Client::getTimeoutCounter()
+{
+    return _timeoutCounter;
+}
+
 void Client::write(char * buffer, int count)
 {
     if(count != ::write(_fd, buffer, count))
