@@ -6,17 +6,19 @@ int main(int argc,char** argv)
 {
     if(argc != 2) error(1, 0, "Need 1 arg (port)");
     uint16_t port = readPort(argv[1]);
+#ifdef WTO
     pthread_create(&connt,NULL,connectionCheck,NULL);
+#endif
     signal(SIGINT, ctrl_c);
     signal(SIGPIPE, SIG_IGN);
 
     int epollFd = epoll_create1(0);
     servHandler = new Server(epollFd,port);
-
+    CmdHandler cmd(epollFd);
     setReuseAddr(servHandler->sock());
-    epoll_event ee {EPOLLIN, {.ptr=servHandler}};
-    epoll_ctl(epollFd, EPOLL_CTL_ADD, servHandler->sock(), &ee);
-    
+    //ee {EPOLLIN, {.ptr=servHandler}};
+    epoll_event ee;
+
     while(true){
         int n = epoll_wait(epollFd, &ee, 1, -1);
         if(n==-1) 
@@ -34,6 +36,10 @@ int main(int argc,char** argv)
         }
         else
         {
+            if(ee.data.fd==STDIN_FILENO)
+            {
+                printf("UwU\n");
+            }
             //printf("%d\n",ee.events);
             ((Handler*)ee.data.ptr)->handleEvent(ee.events);
         }
@@ -62,8 +68,10 @@ void ctrl_c(int)
         delete client;
     //close(servFd);
     delete servHandler;
+#ifdef WTO
     done=true;
     pthread_join(connt,NULL);
+#endif
     printf("Closing server\n");
     exit(0);
 }
@@ -88,7 +96,7 @@ void* connectionCheck(void* arg)
         for(Client* c : clients)
         {
             c->timeoutCounterUp();
-            c->write("Test\n",6);
+            //c->write("Test\n",6);
             printf("%d\n",c->getTimeoutCounter());
             if(c->getTimeoutCounter()>5)
             {

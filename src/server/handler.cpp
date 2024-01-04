@@ -1,5 +1,35 @@
 #include "handler.h"
 
+std::vector<std::string> splitBy(char* line,char sep,char end)
+{
+    std::vector<std::string> res;
+    //int i=0;
+    while(*line!='\0')
+    {
+        if(*line==sep || *line==end)
+        {
+            line++;
+            continue;
+        }
+        std::string tmp="";
+        while(*line!=sep && *line!=end && *line!='\0')
+        {
+            tmp+=*line;
+            line++;
+        }
+        res.push_back(tmp);
+    }
+    return res;
+}
+
+char* itoa(int val,char* str)
+{
+    std::stringstream ss;
+    ss << val;
+    strcpy(str,ss.str().c_str());
+    return str;
+}
+
 Client::Client(int fd,int epollfd): _fd(fd), _epollFd(epollfd)
 {
     epoll_event ee {EPOLLIN | EPOLLRDHUP,{.ptr=this}};
@@ -20,11 +50,24 @@ void Client::handleEvent(uint32_t events)
 {
     if(events & EPOLLIN) {
         char buffer[256];
+        memset(buffer,0,256);
         ssize_t count = read(_fd, buffer, 256);
         if(count > 0)
+        {
+            //char tmpfd[32];
+            //::write(STDOUT_FILENO,itoa(_fd,tmpfd),2);
+            //for(int i=0;i<strlen(buffer);i++)
+            //{
+            //    printf("%d\n",(int)buffer[i]);
+            //}
+            printf("%d: %s",_fd,buffer);
+            //::write(STDOUT_FILENO,buffer,count);
             sendToAllBut(_fd, buffer, count);
+        }
         else
+        {
             events |= EPOLLERR;
+        }
     }
     if(events & ~EPOLLIN){
         remove();
@@ -69,6 +112,8 @@ Server::Server(int epollfd,uint16_t port): _epollFd(epollfd)
     res = listen(_sock, 1);
     if(res) 
         error(1, errno, "listen failed");
+    epoll_event ee {EPOLLIN, {.ptr=this}};
+    epoll_ctl(_epollFd, EPOLL_CTL_ADD, _sock, &ee);
 
 }
 
@@ -102,3 +147,54 @@ void Server::handleEvent(uint32_t events)
     }
 }
 
+void CmdHandler::handleEvent(uint32_t events)
+{
+    if(events & EPOLLIN)
+    {
+        char buffer[1024]={};
+        ssize_t count = read(STDIN_FILENO, buffer, 1024);
+        
+        std::vector<std::string> cmd = splitBy(buffer);
+        if(!strcmp(cmd[0].c_str(),"sc"))
+        {
+            listConnected();
+        }
+        if(!strcmp(cmd[0].c_str(),"st"))
+        {
+            std::string msg = "";
+            for(int i=2;i<cmd.size()-1;i++)
+            {
+                msg += cmd[i] + " ";
+            }
+            msg+=cmd[cmd.size()-1]+"\n";
+            sendTo(atoi(cmd[1].c_str()),(char *)(msg.c_str()),msg.length());
+        }
+    }
+
+}
+
+CmdHandler::CmdHandler(int epollFd)
+{
+    epoll_event ee {EPOLLIN,{.ptr=this}};
+    epoll_ctl(epollFd, EPOLL_CTL_ADD, STDIN_FILENO, &ee);
+}
+
+void CmdHandler::listConnected()
+{
+    for(Client* c : clients)
+    {
+        printf("Client: %d\n",c->fd());
+    }
+}
+
+void CmdHandler::sendTo(int fd, char * buffer, int count)
+{
+    for(Client*c : clients)
+    {
+        if(c->fd()==fd)
+        {
+            c->write(buffer,count);
+            break;
+        }
+    }
+}
