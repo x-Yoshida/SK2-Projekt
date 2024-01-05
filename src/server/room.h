@@ -25,5 +25,6 @@ class Room
         void listPlayers();
         void sendCurrentPlayers(Client* c);
         void join(Client* c);
+        void sendToAllInRoomBut(Client* player, std::string msg);
 
 };

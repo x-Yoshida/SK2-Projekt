@@ -49,11 +49,30 @@ void Room::sendCurrentPlayers(Client* c)
 
 void Room::join(Client* c)
 {
-    players.insert(c);
+    if(!(_currentPlayers<_maxPlayers))
+    {
+        c->write("ROOMFULL\n",10);
+        return;
+    }
     std::stringstream ss;
     ss<<"JOINED|"<<c->name()<<"\n";
     std::string tmp = ss.str();
     std::cout << tmp<<std::endl;
+    sendToAllInRoomBut(c,tmp);
     c->write((char *)tmp.c_str(),tmp.length());
     sendCurrentPlayers(c);
+    players.insert(c);
+    _currentPlayers++;
+}
+
+void Room::sendToAllInRoomBut(Client* player, std::string msg)
+{
+    for(Client* p : players)
+    {
+        if(p==player)
+        {
+            continue;
+        }
+        p->write((char*)msg.c_str(),msg.length());
+    }
 }

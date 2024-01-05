@@ -4,7 +4,7 @@ std::vector<std::string> splitBy(char* line,char sep,char end)
 {
     std::vector<std::string> res;
     //int i=0;
-    while(*line!='\0')
+    while(*line!='\0' && *line!=end)
     {
         if(*line==sep || *line==end)
         {
@@ -76,10 +76,11 @@ void Client::handleEvent(uint32_t events)
                 ss <<"Rooms\n";
                 for(Room* r : rooms)
                 {
-                    ss<< "ROOM|"<<r->name()<<"|("<<r->currentPlayers()<<"/"<<r->maxPlayers()<<")";
+                    ss<< "ROOM|"<<r->name()<<"|("<<r->currentPlayers()<<"/"<<r->maxPlayers()<<")"<<"\n";
                 }
                 std::string tmp = ss.str();
                 write((char*)tmp.c_str(),tmp.length());
+                printf("%s\n",tmp.c_str());
             }
 
             if(!strcmp(msgv[0].c_str(),"JOIN"))
@@ -144,6 +145,8 @@ Server::Server(int epollfd,uint16_t port): _epollFd(epollfd)
         error(1, errno, "listen failed");
     epoll_event ee {EPOLLIN, {.ptr=this}};
     epoll_ctl(_epollFd, EPOLL_CTL_ADD, _sock, &ee);
+    rooms.insert(new Room("Room1",9));
+    rooms.insert(new Room("Test",2));
 
 }
 
