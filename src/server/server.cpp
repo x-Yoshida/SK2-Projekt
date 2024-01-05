@@ -66,6 +66,10 @@ void ctrl_c(int)
 {
     for(Client * client : clients)
         delete client;
+    for(Room* r : rooms)
+    {
+        delete r;
+    }
     //close(servFd);
     delete servHandler;
 #ifdef WTO

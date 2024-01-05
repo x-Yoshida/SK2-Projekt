@@ -15,11 +15,11 @@
 #include <signal.h>
 #include <pthread.h>
 
-
 #include "handler.h"
 
 //int servFd;
 std::unordered_set<Client*> clients;
+std::unordered_set<Room*> rooms;
 Server* servHandler;
 
 void ctrl_c(int);

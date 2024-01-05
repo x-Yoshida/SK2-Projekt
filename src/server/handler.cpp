@@ -46,23 +46,53 @@ int Client::fd() const
     return _fd;
 }
 
+std::string Client::name() const
+{
+    return _name;
+}
+
 void Client::handleEvent(uint32_t events)
 {
     if(events & EPOLLIN) {
-        char buffer[256];
-        memset(buffer,0,256);
-        ssize_t count = read(_fd, buffer, 256);
+        char buffer[BUFFER_SIZE];
+        memset(buffer,0,BUFFER_SIZE);
+        ssize_t count = read(_fd, buffer, BUFFER_SIZE);
         if(count > 0)
         {
-            //char tmpfd[32];
-            //::write(STDOUT_FILENO,itoa(_fd,tmpfd),2);
-            //for(int i=0;i<strlen(buffer);i++)
-            //{
-            //    printf("%d\n",(int)buffer[i]);
-            //}
+            std::vector<std::string> msgv = splitBy(buffer);
             printf("%d: %s",_fd,buffer);
-            //::write(STDOUT_FILENO,buffer,count);
-            sendToAllBut(_fd, buffer, count);
+            
+            printf("%s\n",msgv[0].c_str());
+
+            if(!strcmp(msgv[0].c_str(),"SETNICK"))
+            {
+                _name=msgv[1];
+                write("NICKACCEPTED",13);
+            }
+            if(!strcmp(msgv[0].c_str(),"ROOMS"))
+            {
+                //To be changed
+                std::stringstream ss;
+                ss <<"Rooms\n";
+                for(Room* r : rooms)
+                {
+                    ss<< "ROOM|"<<r->name()<<"|("<<r->currentPlayers()<<"/"<<r->maxPlayers()<<")";
+                }
+                std::string tmp = ss.str();
+                write((char*)tmp.c_str(),tmp.length());
+            }
+
+            if(!strcmp(msgv[0].c_str(),"JOIN"))
+            {
+                for(Room* r : rooms)
+                {
+                    if(r->name()==msgv[1])
+                    {
+                        r->join(this);
+                    }
+                }
+            }
+            //sendToAllBut(_fd, buffer, count);
         }
         else
         {
@@ -151,14 +181,23 @@ void CmdHandler::handleEvent(uint32_t events)
 {
     if(events & EPOLLIN)
     {
-        char buffer[1024]={};
-        ssize_t count = read(STDIN_FILENO, buffer, 1024);
+        char buffer[BUFFER_SIZE]={};
+        ssize_t count = read(STDIN_FILENO, buffer, BUFFER_SIZE);
         
         std::vector<std::string> cmd = splitBy(buffer);
-        if(!strcmp(cmd[0].c_str(),"sc"))
+        if(!strcmp(cmd[0].c_str(),"lc"))
         {
             listConnected();
         }
+        if(!strcmp(cmd[0].c_str(),"lr"))
+        {
+            listRooms();
+        }
+        if(!strcmp(cmd[0].c_str(),"cr"))
+        {
+            rooms.insert(new Room(cmd[1]));
+        }
+        
         if(!strcmp(cmd[0].c_str(),"st"))
         {
             std::string msg = "";
@@ -184,6 +223,14 @@ void CmdHandler::listConnected()
     for(Client* c : clients)
     {
         printf("Client: %d\n",c->fd());
+    }
+}
+
+void CmdHandler::listRooms()
+{
+    for(Room* r : rooms)
+    {
+        printf("Room: %s\n",r->name().c_str());
     }
 }
 
