@@ -1,3 +1,0 @@
-/home/yoshida/Dokumenty/Studia/Sieci2/Projekt/build/CMakeFiles/server.bin.dir
-/home/yoshida/Dokumenty/Studia/Sieci2/Projekt/build/CMakeFiles/edit_cache.dir
-/home/yoshida/Dokumenty/Studia/Sieci2/Projekt/build/CMakeFiles/rebuild_cache.dir

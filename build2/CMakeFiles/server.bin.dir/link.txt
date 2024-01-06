@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/server.bin.dir/src/server/server.cpp.o CMakeFiles/server.bin.dir/src/server/handler.cpp.o CMakeFiles/server.bin.dir/src/server/room.cpp.o -o server.bin 
