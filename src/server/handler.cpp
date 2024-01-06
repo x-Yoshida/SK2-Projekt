@@ -3,7 +3,7 @@
 std::vector<std::string> splitBy(char* line,char sep,char end)
 {
     std::vector<std::string> res;
-    //int i=0;
+    
     while(*line!='\0' && *line!=end)
     {
         if(*line==sep || *line==end)
@@ -46,9 +46,20 @@ int Client::fd() const
     return _fd;
 }
 
+int Client::points() const
+{
+    return _points;
+}
+
 std::string Client::name() const
 {
     return _name;
+}
+
+
+bool Client::answerd() const
+{
+    return _answerd;
 }
 
 void Client::handleEvent(uint32_t events)
@@ -67,7 +78,7 @@ void Client::handleEvent(uint32_t events)
             if(!strcmp(msgv[0].c_str(),"SETNICK"))
             {
                 _name=msgv[1];
-                write("NICKACCEPTED",13);
+                write("NICKACCEPTED");
             }
             if(!strcmp(msgv[0].c_str(),"ROOMS"))
             {
@@ -79,7 +90,7 @@ void Client::handleEvent(uint32_t events)
                     ss<< "ROOM|"<<r->name()<<"|("<<r->currentPlayers()<<"/"<<r->maxPlayers()<<")"<<"\n";
                 }
                 std::string tmp = ss.str();
-                write((char*)tmp.c_str(),tmp.length());
+                write(tmp);
                 printf("%s\n",tmp.c_str());
             }
 
@@ -93,7 +104,17 @@ void Client::handleEvent(uint32_t events)
                     }
                 }
             }
-            //sendToAllBut(_fd, buffer, count);
+
+            if(!strcmp(msgv[0].c_str(),"START"))
+            {
+                _room->startGame();
+            }
+
+            if(!strcmp(msgv[0].c_str(),"ANSWERS"))
+            {
+                _room->submitAnswer(this,msgv[1],msgv[2],msgv[3]);
+            }
+            
         }
         else
         {
@@ -114,12 +135,18 @@ int Client::getTimeoutCounter()
 {
     return _timeoutCounter;
 }
-
+/*
 void Client::write(char * buffer, int count)
 {
     if(count != ::write(_fd, buffer, count))
         remove();
     
+}
+*/
+void Client::write(std::string msg)
+{
+    if(msg.length() != ::write(_fd,msg.c_str(),msg.length()))
+        remove();
 }
 
 void Client::remove() 
@@ -128,6 +155,28 @@ void Client::remove()
     clients.erase(this);
     delete this;
 }
+
+void Client::joinRoom(Room* room)
+{
+    _room=room;
+}
+
+Room* Client::room()
+{
+    return _room;
+}
+
+
+void Client::addPoints(int val)
+{
+    _points+=val;
+}
+
+void Client::clearPoints()
+{
+    _points=0;
+}
+
 
 Server::Server(int epollfd,uint16_t port): _epollFd(epollfd)
 {
@@ -209,7 +258,22 @@ void CmdHandler::handleEvent(uint32_t events)
                 msg += cmd[i] + " ";
             }
             msg+=cmd[cmd.size()-1]+"\n";
-            sendTo(atoi(cmd[1].c_str()),(char *)(msg.c_str()),msg.length());
+            sendTo(atoi(cmd[1].c_str()),msg);
+        }
+        if(!strcmp(cmd[0].c_str(),"sa"))
+        {
+            for(Room* r : rooms)
+            {
+                if(r->name()==cmd[1])
+                {
+                    r->printAnswers();
+                    break;
+                }
+            }
+        }
+        if(!strcmp(cmd[0].c_str(),"exit"))
+        {
+            ctrl_c(SIGINT);
         }
     }
 
@@ -236,7 +300,7 @@ void CmdHandler::listRooms()
         printf("Room: %s\n",r->name().c_str());
     }
 }
-
+/*
 void CmdHandler::sendTo(int fd, char * buffer, int count)
 {
     for(Client*c : clients)
@@ -244,6 +308,18 @@ void CmdHandler::sendTo(int fd, char * buffer, int count)
         if(c->fd()==fd)
         {
             c->write(buffer,count);
+            break;
+        }
+    }
+}
+*/
+void CmdHandler::sendTo(int fd, std::string& msg)
+{
+    for(Client*c : clients)
+    {
+        if(c->fd()==fd)
+        {
+            c->write(msg);
             break;
         }
     }

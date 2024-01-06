@@ -16,7 +16,7 @@ int main(int argc,char** argv)
     servHandler = new Server(epollFd,port);
     CmdHandler cmd(epollFd);
     setReuseAddr(servHandler->sock());
-    //ee {EPOLLIN, {.ptr=servHandler}};
+    
     epoll_event ee;
 
     while(true){
@@ -40,7 +40,7 @@ int main(int argc,char** argv)
             {
                 printf("UwU\n");
             }
-            //printf("%d\n",ee.events);
+            
             ((Handler*)ee.data.ptr)->handleEvent(ee.events);
         }
     }
@@ -70,7 +70,6 @@ void ctrl_c(int)
     {
         delete r;
     }
-    //close(servFd);
     delete servHandler;
 #ifdef WTO
     done=true;
@@ -80,14 +79,14 @@ void ctrl_c(int)
     exit(0);
 }
 
-void sendToAllBut(int fd, char * buffer, int count)
+void sendToAllBut(int fd, std::string msg)
 {
     auto it = clients.begin();
     while(it!=clients.end()){
         Client * client = *it;
         it++;
         if(client->fd()!=fd)
-            client->write(buffer, count);
+            client->write(msg);
     }
 }
 
@@ -100,7 +99,7 @@ void* connectionCheck(void* arg)
         for(Client* c : clients)
         {
             c->timeoutCounterUp();
-            //c->write("Test\n",6);
+            
             printf("%d\n",c->getTimeoutCounter());
             if(c->getTimeoutCounter()>5)
             {

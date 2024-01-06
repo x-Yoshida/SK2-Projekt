@@ -44,17 +44,27 @@ class Client : public Handler
     int _fd;
     int _epollFd;
     int _timeoutCounter=0;
+    int _points=0;
+    bool _answerd=false;
     std::string _name;
+    Room* _room=nullptr;
     public:
         Client(int fd,int epollfd);
         virtual ~Client();
         int fd() const;
+        int points() const;
+        bool answerd() const;
         std::string name() const;
+        Room* room();
         virtual void handleEvent(uint32_t events) override;
         void timeoutCounterUp();
         int getTimeoutCounter();
-        void write(char * buffer, int count);
+        //void write(char * buffer, int count);
+        void write(std::string msg);
         void remove();
+        void joinRoom(Room* room);
+        void addPoints(int val);
+        void clearPoints();
 };
 
 class Server : public Handler {
@@ -73,7 +83,8 @@ class CmdHandler : public Handler
     public:
         CmdHandler(int epollFd);
         virtual void handleEvent(uint32_t events) override;
-        void sendTo(int fd, char * buffer, int count);
+        //void sendTo(int fd, char * buffer, int count);
+        void sendTo(int fd, std::string& msg);
         void listConnected();
         void listRooms();
 };
