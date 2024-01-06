@@ -1,0 +1,8 @@
+{
+    "files": [
+        "game.ui",
+        "main.py",
+        "nick.ui",
+        "room.ui"
+    ]
+}

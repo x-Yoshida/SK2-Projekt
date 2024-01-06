@@ -1,3 +1,5 @@
 .vscode
 *.bin
 build
+src/client/venv
+src/client/.venv
