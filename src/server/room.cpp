@@ -38,6 +38,12 @@ void Room::listPlayers()
     }
 }
 
+void Room::removePlayer(Client* c)
+{
+    players.erase(c);
+    _currentPlayers--;
+}
+
 void Room::sendCurrentPlayers(Client* c)
 {
     std::stringstream ss;
@@ -46,6 +52,7 @@ void Room::sendCurrentPlayers(Client* c)
     {
         ss<<p->name()<<"|";
     }
+    ss<<"\n";
     std::string tmp = ss.str();
     std::cout << tmp<<std::endl;
     c->write(tmp);
@@ -64,8 +71,15 @@ void Room::join(Client* c)
     std::string tmp = ss.str();
     std::cout << tmp<<std::endl;
     sendToAllInRoomBut(c,tmp);
+    ss<<"\nCURRENTPLAYERS|";
+    for(Client* p : players)
+    {
+        ss<<p->name()<<"|";
+    }
+    ss<<"\n";
+    tmp = ss.str();
+    std::cout << tmp<<std::endl;
     c->write(tmp);
-    sendCurrentPlayers(c);
     players.insert(c);
     _currentPlayers++;
 }
@@ -150,5 +164,5 @@ void Room::submitAnswer(Client* c,std::string &country,std::string &city,std::st
     answers.country[country].push_back(c);
     answers.city[city].push_back(c);
     answers.name[name].push_back(c);
-    
+
 }

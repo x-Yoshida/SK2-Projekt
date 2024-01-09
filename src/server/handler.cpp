@@ -153,6 +153,7 @@ void Client::remove()
 {
     printf("removing %d\n", _fd);
     clients.erase(this);
+    _room->removePlayer(this);
     delete this;
 }
 

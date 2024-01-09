@@ -34,6 +34,7 @@ class Room
         int maxPlayers();
         int currentPlayers();
         void listPlayers();
+        void removePlayer(Client* c);
         void sendCurrentPlayers(Client* c);
         void join(Client* c);
         void sendToAllInRoomBut(Client* player, std::string msg);
