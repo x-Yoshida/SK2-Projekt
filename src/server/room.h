@@ -2,6 +2,8 @@
 #include <iostream>
 #include <unordered_map>
 #include <random>
+#include <fstream>
+#include <algorithm>
 #include "handler.h"
 
 #ifndef BUFFER_SIZE
@@ -17,14 +19,19 @@ struct Answers
     std::unordered_map<std::string,std::vector<Client*>> name;
 };
 
+bool findInCSV(std::string path,std::string answer);
+void toUpper(std::string &str);
 
 class Room
 {
     bool _inGame;
     int _maxPlayers;
     int _currentPlayers;
+    int _finished;
+    int _MaxRounds;
     std::string _name;
     std::vector<char> l;
+    std::string _letter;
     std::unordered_set<Client*> players;
     Answers answers;
     public:
@@ -44,7 +51,7 @@ class Room
         void startGame();
         void printAnswers();
         void submitAnswer(Client* c,std::string &country,std::string &city,std::string &name);
+        void scorePlayers();
 };
-
 
 

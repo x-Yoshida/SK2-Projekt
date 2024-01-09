@@ -4,6 +4,11 @@ pthread_t connt;
 bool done = false;
 int main(int argc,char** argv)
 {
+
+    if(findInCSV("cities.csv","Warsaw"))
+    {
+        std::cout<<"fafawf"<<std::endl;
+    }
     if(argc != 2) error(1, 0, "Need 1 arg (port)");
     uint16_t port = readPort(argv[1]);
 #ifdef WTO

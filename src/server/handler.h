@@ -31,6 +31,7 @@ class Client;
 extern std::unordered_set<Client*> clients;
 extern std::unordered_set<Room*> rooms;
 
+
 extern void sendToAllBut(int fd, char * buffer, int count);
 extern void ctrl_c(int);
 
@@ -47,7 +48,7 @@ class Client : public Handler
     int _points=0;
     bool _answerd=false;
     std::string _name;
-    Room* _room=nullptr;
+    Room* _room;
     public:
         Client(int fd,int epollfd);
         virtual ~Client();
@@ -64,6 +65,7 @@ class Client : public Handler
         void remove();
         void joinRoom(Room* room);
         void addPoints(int val);
+        void showPoints();
         void clearPoints();
 };
 

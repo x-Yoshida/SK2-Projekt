@@ -34,6 +34,9 @@ Client::Client(int fd,int epollfd): _fd(fd), _epollFd(epollfd)
 {
     epoll_event ee {EPOLLIN | EPOLLRDHUP,{.ptr=this}};
     epoll_ctl(_epollFd, EPOLL_CTL_ADD, _fd, &ee);
+    Room dummy("PlzNoSegfault");
+    _room=&dummy; //Too late for better solution
+    _name="";
 }
 
 Client::~Client(){
@@ -41,6 +44,7 @@ Client::~Client(){
     shutdown(_fd, SHUT_RDWR);
     close(_fd);
 }
+
 int Client::fd() const 
 {
     return _fd;
@@ -55,7 +59,6 @@ std::string Client::name() const
 {
     return _name;
 }
-
 
 bool Client::answerd() const
 {
@@ -173,6 +176,11 @@ void Client::addPoints(int val)
     _points+=val;
 }
 
+void Client::showPoints()
+{
+    std::cout << _points << std::endl;
+}
+
 void Client::clearPoints()
 {
     _points=0;
@@ -248,7 +256,14 @@ void CmdHandler::handleEvent(uint32_t events)
         }
         if(!strcmp(cmd[0].c_str(),"cr"))
         {
-            rooms.insert(new Room(cmd[1]));
+            if(cmd.size()==2)
+            {
+                rooms.insert(new Room(cmd[1]));
+            }
+            else if(cmd.size()==3)
+            {
+                rooms.insert(new Room(cmd[1],atoi(cmd[2].c_str())));
+            }
         }
         
         if(!strcmp(cmd[0].c_str(),"st"))
