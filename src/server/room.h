@@ -28,7 +28,8 @@ class Room
     int _maxPlayers;
     int _currentPlayers;
     int _finished;
-    int _MaxRounds;
+    int _Round;
+    int _LastRound;
     std::string _name;
     std::vector<char> l;
     std::string _letter;
@@ -36,7 +37,7 @@ class Room
     Answers answers;
     public:
         Room();
-        Room(std::string name,int maxPlayers=4);
+        Room(std::string name,int maxPlayers=4,int LastRound=4);
         std::string name();
         bool inGame();
         int maxPlayers();

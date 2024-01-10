@@ -17,10 +17,11 @@
 
 #include "handler.h"
 
-//int servFd;
+
 std::unordered_set<Client*> clients;
 std::unordered_set<Room*> rooms;
 Server* servHandler;
+Room dummy;
 
 void ctrl_c(int);
 

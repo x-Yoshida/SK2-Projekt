@@ -1,6 +1,6 @@
 #include "room.h"
 
-Room::Room(std::string name,int maxPlayers): _name(name), _maxPlayers(maxPlayers)
+Room::Room(std::string name,int maxPlayers,int LastRound): _name(name), _maxPlayers(maxPlayers), _LastRound(LastRound)
 {
     for(int i=65;i<=90;i++)
     {
@@ -8,6 +8,10 @@ Room::Room(std::string name,int maxPlayers): _name(name), _maxPlayers(maxPlayers
     }
     _currentPlayers=0;
     _inGame=false;
+    if(_LastRound>5)
+    {
+        _LastRound=5;
+    }
     players={};
 }
 Room::Room()
@@ -76,7 +80,7 @@ void Room::join(Client* c)
     std::string tmp = ss.str();
     std::cout << tmp<<std::endl;
     sendToAllInRoomBut(c,tmp);
-    ss<<"\nCURRENTPLAYERS|";
+    ss<<"CURRENTPLAYERS|";
     for(Client* p : players)
     {
         ss<<p->name()<<"|";
@@ -221,8 +225,6 @@ void Room::scorePlayers()
         }
     }
 
-    std::cout << 1 << std::endl;
-
     for(auto& [key,vec]:answers.city)
     {
         if(findInCSV("cities.csv",key))
@@ -256,8 +258,6 @@ void Room::scorePlayers()
             }
         }
     }
-
-    std::cout << 2 << std::endl;
     
     for(auto& [key,vec]:answers.name)
     {
@@ -278,8 +278,6 @@ void Room::scorePlayers()
     {
         for(std::string key : validName)
         {
-
-            std::cout << "Helpmeplz" << std::endl;
             for(Client* c : answers.name[key])
             {
                 if(answers.name[key].size()==1)
@@ -295,10 +293,10 @@ void Room::scorePlayers()
         }
     }
 
-    std::cout << 3 << std::endl;
     for(Client * c : players)
     {
-        c->showPoints();
+        //c->showPoints();
+        c->write("SCORES|"+std::to_string(c->points()));
     }
 }
 
@@ -307,6 +305,10 @@ bool Room::findInCSV(std::string path,std::string answer)
 {
     toUpper(answer);
     if(answer[0]!=_letter[0])
+    {
+        return false;
+    }
+    if(answer=="YYY")
     {
         return false;
     }
@@ -359,18 +361,14 @@ bool findInCSV(std::string path,std::string answer)
     std::getline(in,tmp,'\n');
     while(!in.eof())
     {
-        //std::cout<<tmp<<std::endl<<" "<<(tmp[0]!=answer[0])<<std::endl;
-        //sleep(1);
         if(tmp[0]!=answer[0])
         {
-            //std::cout<<(tmp[0]!=answer[0])<<std::endl;
             std::getline(in,tmp,'\n');
             continue;
         }
         while((!in.eof())&&(tmp[0]==answer[0]))
         {
             toUpper(tmp);
-            //std::cout << tmp << " " << answer << std::endl;
             if(tmp==answer)
             {
                 in.close();

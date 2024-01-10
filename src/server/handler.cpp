@@ -34,7 +34,7 @@ Client::Client(int fd,int epollfd): _fd(fd), _epollFd(epollfd)
 {
     epoll_event ee {EPOLLIN | EPOLLRDHUP,{.ptr=this}};
     epoll_ctl(_epollFd, EPOLL_CTL_ADD, _fd, &ee);
-    Room dummy;
+    //Room dummy;
     _room=&dummy; //Too late for better solution
     _name="";
     clearPoints();
@@ -81,7 +81,12 @@ void Client::handleEvent(uint32_t events)
 
             if(!strcmp(msgv[0].c_str(),"SETNICK"))
             {
-                _name=msgv[1];
+                int i=1;
+                for(i;i<msgv.size()-1;i++)
+                {
+                    _name+=msgv[i]+" ";
+                }
+                _name+=msgv[i];
                 write("NICKACCEPTED");
             }
             if(!strcmp(msgv[0].c_str(),"ROOMS"))
@@ -117,6 +122,20 @@ void Client::handleEvent(uint32_t events)
             if(!strcmp(msgv[0].c_str(),"ANSWERS"))
             {
                 _room->submitAnswer(this,msgv[1],msgv[2],msgv[3]);
+            }
+
+            if(!strcmp(msgv[0].c_str(),"CREATEROOM"))
+            {
+                if(rooms.size()<MAX_ROOMS)
+                {
+                    Room* newRoom = new Room(msgv[1],std::stoi(msgv[2])); 
+                    rooms.insert(newRoom);
+                    joinRoom(newRoom);
+                }
+                else
+                {
+                    write("TOOMANYROOMS\n");
+                }
             }
             
         }
@@ -164,6 +183,12 @@ void Client::remove()
 void Client::joinRoom(Room* room)
 {
     _room=room;
+}
+
+void Client::leaveRoom()
+{
+    _room->removePlayer(this);
+    _room=&dummy;
 }
 
 Room* Client::room()

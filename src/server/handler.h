@@ -19,6 +19,7 @@
 
 #include "room.h"
 
+#define MAX_ROOMS 40
 #ifndef BUFFER_SIZE
 #define BUFFER_SIZE 1024
 #endif
@@ -30,6 +31,7 @@ class Room;
 class Client;
 extern std::unordered_set<Client*> clients;
 extern std::unordered_set<Room*> rooms;
+extern Room dummy;
 
 
 extern void sendToAllBut(int fd, char * buffer, int count);
@@ -65,6 +67,7 @@ class Client : public Handler
         void write(std::string msg);
         void remove();
         void joinRoom(Room* room);
+        void leaveRoom();
         void addPoints(int val);
         void showPoints();
         void clearPoints();
