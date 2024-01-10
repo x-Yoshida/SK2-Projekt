@@ -1,7 +1,7 @@
 import sys
 from PyQt5 import QtGui
 from PyQt5.uic import loadUi
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal, QTimer
 from PyQt5.QtWidgets import QDialog, QApplication, QWidget, QStackedWidget, QButtonGroup, QMessageBox
 import socket
 current_players = {}
@@ -76,6 +76,12 @@ class RoomsScreen(QDialog):
         loadUi("room.ui", self)
         self.update_combobox()
         self.roomSubmitButton.clicked.connect(self.join_room)
+        self.roomAddButton.clicked.connect(self.add_room)
+
+    def add_room(self):
+            send_message("ROOMS\n\0")  # Dodaj odpowiednie polecenie do serwera
+            new_room = client_socket.recv(1024).decode("utf-8").strip()
+            self.roomComboBox.addItem(new_room)
 
     def update_combobox(self):
         self.roomComboBox.clear()
@@ -132,11 +138,41 @@ class GameScreen(QDialog):
             self.gameLabelPlayer8,
                 ]
 
+        self.gameCheck = [
+            self.labelCheckMyScore,
+            self.labelCheck1,
+            self.labelCheck2,
+            self.labelCheck3,
+            self.labelCheck4,
+            self.labelCheck5,
+            self.labelCheck6,
+            self.labelCheck7,
+            self.labelCheck8,
+                ]
+
         self.setup_current_players()
         self.gameButtonStart.clicked.connect(self.start_game)
         self.generatedLetter = self.letterLabel
         self.sendButton = self.gameButtonSend
+        self.labelCheckMyScore.setVisible(False)
+        self.labelCheck1.setVisible(False)
+        self.labelCheck2.setVisible(False)
+        self.labelCheck3.setVisible(False)
+        self.labelCheck4.setVisible(False)
+        self.labelCheck5.setVisible(False)
+        self.labelCheck6.setVisible(False)
+        self.labelCheck7.setVisible(False)
+        self.labelCheck8.setVisible(False)
         self.sendButton.setVisible(False)
+
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_timer)
+        self.time_remaining = 20  # Ustaw czas początkowy
+
+
+        self.timerLabel = self.gameTimerLabel
+        self.timerLabel.setText(f"Time: {self.time_remaining} s")
+
 
 
     def update_screen(self, message):
@@ -169,7 +205,9 @@ class GameScreen(QDialog):
             letter = message.split("|")[1].strip()
             self.generatedLetter.setText(f"{letter}")
             self.sendButton.setVisible(True)
+            self.timer.start(1000)
             self.sendButton.clicked.connect(self.send_answers)
+
 
 
         elif message.startswith("WAITFORANSWERS"):
@@ -178,10 +216,13 @@ class GameScreen(QDialog):
             msg.setText("Jeszcze nie wszyscy gracze udzielili swoich odpowiedzi!")
             msg.exec_()
 
+        elif message.startswith("THANKS"):
+            self.labelCheckMyScore.setVisible(True)
+
         elif message.startswith("SCORES"):
             # Assuming SCORES message format is "SCORES|score"
             score = int(message.split("|")[1])
-            self.gameLabelMyScore.setText(f"My Score: {score}")
+            self.gameLabelMyScore.setText(f"{player_nick}: {score}")
             # Enable input fields and Send button for the next round
             self.countryTextEdit.setEnabled(True)
             self.cityTextEdit.setEnabled(True)
@@ -199,11 +240,26 @@ class GameScreen(QDialog):
         country = self.countryTextEdit.toPlainText()
         city = self.cityTextEdit.toPlainText()
         name = self.nameTextEdit.toPlainText()
+        if not country or not country.strip():
+            country = "yyy"
+        if not city or not city.strip():
+            city = "yyy"
+        if not name or not name.strip():
+            name = "yyy"
+
         print(country,city,name)
         print(f"ANSWERS {country} {city} {name}")
 
         send_message("ANSWERS "+country.strip()+" "+city.strip()+" "+name.strip()+"\n\0")
 
+
+    def update_timer(self):
+        self.time_remaining -= 1
+        self.timerLabel.setText(f"Time: {self.time_remaining} s")
+
+        if self.time_remaining <= 0:
+            self.timer.stop()
+            self.send_answers()
 
     def setup_current_players(self):
         global current_players
