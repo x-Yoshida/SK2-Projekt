@@ -6,8 +6,13 @@ Room::Room(std::string name,int maxPlayers): _name(name), _maxPlayers(maxPlayers
     {
         l.push_back(i);
     }
+    _currentPlayers=0;
     _inGame=false;
     players={};
+}
+Room::Room()
+{
+
 }
 
 std::string Room::name()
@@ -168,18 +173,20 @@ void Room::submitAnswer(Client* c,std::string &country,std::string &city,std::st
     _finished++;
     if(_finished==players.size())
     {
+        std::cout << "Scoring" << std::endl;
         scorePlayers();
     }
 }
 
+//Verry inefficient on memory ngl
 void Room::scorePlayers()
 {
     std::vector<std::string> validCountry;
-    std::vector<std::string> invalidCountry;
+    //std::vector<std::string> invalidCountry;
     std::vector<std::string> validCity;
-    std::vector<std::string> invalidCity;
+    //std::vector<std::string> invalidCity;
     std::vector<std::string> validName;
-    std::vector<std::string> invalidName;
+    //std::vector<std::string> invalidName;
     for(auto& [key,vec]:answers.country)
     {
         if(findInCSV("countries.csv",key))
@@ -188,32 +195,121 @@ void Room::scorePlayers()
         }
         else
         {
-            invalidCountry.push_back(key);
+            //invalidCountry.push_back(key);
         }
     }
-
-    for(std::string key : validCountry)
+    if(validCountry.size()==1&&(answers.country[validCountry[0]].size()==1))
     {
-        for(Client* c : answers.country[key])
+        answers.country[validCountry[0]][0]->addPoints(15);
+    }
+    else
+    {
+        for(std::string key : validCountry)
         {
-            if(answers.country[key].size()==1)
+            for(Client* c : answers.country[key])
             {
-                c->addPoints(10);
+                if(answers.country[key].size()==1)
+                {
+                    c->addPoints(10);
+                }
+                else
+                {
+                    c->addPoints(5);
+                }
+                //c->showPoints();
             }
-            else
-            {
-                c->addPoints(5);
-            }
-            c->showPoints();
         }
     }
 
+    std::cout << 1 << std::endl;
+
+    for(auto& [key,vec]:answers.city)
+    {
+        if(findInCSV("cities.csv",key))
+        {
+            validCity.push_back(key);
+        }
+        else
+        {
+            //invalidCountry.push_back(key);
+        }
+    }
+    if(validCity.size()==1&&(answers.city[validCity[0]].size()==1))
+    {
+        answers.city[validCity[0]][0]->addPoints(15);
+    }
+    else
+    {
+        for(std::string key : validCity)
+        {
+            for(Client* c : answers.city[key])
+            {
+                if(answers.city[key].size()==1)
+                {
+                    c->addPoints(10);
+                }
+                else
+                {
+                    c->addPoints(5);
+                }
+                //c->showPoints();
+            }
+        }
+    }
+
+    std::cout << 2 << std::endl;
+    
+    for(auto& [key,vec]:answers.name)
+    {
+        if(findInCSV("names.csv",key))
+        {
+            validName.push_back(key);
+        }
+        else
+        {
+            //invalidCountry.push_back(key);
+        }
+    }
+    if(validName.size()==1&&(answers.name[validName[0]].size()==1))
+    {
+        answers.name[validName[0]][0]->addPoints(15);
+    }
+    else
+    {
+        for(std::string key : validName)
+        {
+
+            std::cout << "Helpmeplz" << std::endl;
+            for(Client* c : answers.name[key])
+            {
+                if(answers.name[key].size()==1)
+                {
+                    c->addPoints(10);
+                }
+                else
+                {
+                    c->addPoints(5);
+                }
+                //c->showPoints();
+            }
+        }
+    }
+
+    std::cout << 3 << std::endl;
+    for(Client * c : players)
+    {
+        c->showPoints();
+    }
 }
 
 
-bool findInCSV(std::string path,std::string answer)
+bool Room::findInCSV(std::string path,std::string answer)
 {
     toUpper(answer);
+    if(answer[0]!=_letter[0])
+    {
+        return false;
+    }
     std::ifstream in(path);
     std::string tmp;
     std::getline(in,tmp,'\n');//skip first list
@@ -252,4 +348,38 @@ void toUpper(std::string &str)
         str[i]=toupper(str[i]);
     }
     //std::cout << str << std::endl;
+}
+
+bool findInCSV(std::string path,std::string answer)
+{
+    toUpper(answer);
+    std::ifstream in(path);
+    std::string tmp;
+    std::getline(in,tmp,'\n');//skip first list
+    std::getline(in,tmp,'\n');
+    while(!in.eof())
+    {
+        //std::cout<<tmp<<std::endl<<" "<<(tmp[0]!=answer[0])<<std::endl;
+        //sleep(1);
+        if(tmp[0]!=answer[0])
+        {
+            //std::cout<<(tmp[0]!=answer[0])<<std::endl;
+            std::getline(in,tmp,'\n');
+            continue;
+        }
+        while((!in.eof())&&(tmp[0]==answer[0]))
+        {
+            toUpper(tmp);
+            //std::cout << tmp << " " << answer << std::endl;
+            if(tmp==answer)
+            {
+                in.close();
+                return true;
+            }
+            std::getline(in,tmp,'\n');
+        }
+        break;
+    }
+    in.close();
+    return false;
 }

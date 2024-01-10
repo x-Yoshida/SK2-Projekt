@@ -19,8 +19,8 @@ struct Answers
     std::unordered_map<std::string,std::vector<Client*>> name;
 };
 
-bool findInCSV(std::string path,std::string answer);
 void toUpper(std::string &str);
+bool findInCSV(std::string path,std::string answer);
 
 class Room
 {
@@ -35,6 +35,7 @@ class Room
     std::unordered_set<Client*> players;
     Answers answers;
     public:
+        Room();
         Room(std::string name,int maxPlayers=4);
         std::string name();
         bool inGame();
@@ -49,6 +50,7 @@ class Room
         std::string getRandomLatter();
         void startRound(std::string letter);
         void startGame();
+        bool findInCSV(std::string path,std::string answer);
         void printAnswers();
         void submitAnswer(Client* c,std::string &country,std::string &city,std::string &name);
         void scorePlayers();

@@ -34,9 +34,10 @@ Client::Client(int fd,int epollfd): _fd(fd), _epollFd(epollfd)
 {
     epoll_event ee {EPOLLIN | EPOLLRDHUP,{.ptr=this}};
     epoll_ctl(_epollFd, EPOLL_CTL_ADD, _fd, &ee);
-    Room dummy("PlzNoSegfault");
+    Room dummy;
     _room=&dummy; //Too late for better solution
     _name="";
+    clearPoints();
 }
 
 Client::~Client(){
@@ -178,7 +179,7 @@ void Client::addPoints(int val)
 
 void Client::showPoints()
 {
-    std::cout << _points << std::endl;
+    std::cout <<_fd <<": "<< _points << std::endl;
 }
 
 void Client::clearPoints()

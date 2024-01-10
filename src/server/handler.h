@@ -49,6 +49,7 @@ class Client : public Handler
     bool _answerd=false;
     std::string _name;
     Room* _room;
+    //Room dummy;
     public:
         Client(int fd,int epollfd);
         virtual ~Client();

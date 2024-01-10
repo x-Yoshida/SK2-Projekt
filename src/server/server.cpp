@@ -5,7 +5,7 @@ bool done = false;
 int main(int argc,char** argv)
 {
 
-    if(findInCSV("cities.csv","Warsaw"))
+    if(findInCSV("names.csv","Norbert"))
     {
         std::cout<<"fafawf"<<std::endl;
     }
