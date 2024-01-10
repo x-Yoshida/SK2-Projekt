@@ -104,7 +104,7 @@
     <property name="geometry">
      <rect>
       <x>510</x>
-      <y>110</y>
+      <y>190</y>
       <width>121</width>
       <height>21</height>
      </rect>
@@ -117,7 +117,7 @@
     <property name="geometry">
      <rect>
       <x>510</x>
-      <y>130</y>
+      <y>120</y>
       <width>121</width>
       <height>21</height>
      </rect>
@@ -130,7 +130,7 @@
     <property name="geometry">
      <rect>
       <x>510</x>
-      <y>150</y>
+      <y>140</y>
       <width>121</width>
       <height>21</height>
      </rect>
@@ -258,6 +258,166 @@
     </property>
     <property name="text">
      <string>Wyslij odpowiedzi</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelCheck1">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>30</y>
+      <width>67</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:green</string>
+    </property>
+    <property name="text">
+     <string>done</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelCheckMyScore">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>50</y>
+      <width>67</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:green</string>
+    </property>
+    <property name="text">
+     <string>done</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelCheck2">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>50</y>
+      <width>67</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:green</string>
+    </property>
+    <property name="text">
+     <string>done</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelCheck3">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>70</y>
+      <width>67</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:green</string>
+    </property>
+    <property name="text">
+     <string>done</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelCheck4">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>90</y>
+      <width>67</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:green</string>
+    </property>
+    <property name="text">
+     <string>done</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelCheck5">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>120</y>
+      <width>67</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:green</string>
+    </property>
+    <property name="text">
+     <string>done</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelCheck6">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>140</y>
+      <width>67</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:green</string>
+    </property>
+    <property name="text">
+     <string>done</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelCheck7">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>170</y>
+      <width>67</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:green</string>
+    </property>
+    <property name="text">
+     <string>done</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelCheck8">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>190</y>
+      <width>67</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:green</string>
+    </property>
+    <property name="text">
+     <string>done</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="gameTimerLabel">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>410</y>
+      <width>201</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:red</string>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
   </widget>
