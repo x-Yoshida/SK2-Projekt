@@ -300,7 +300,7 @@ void Room::scorePlayers()
     {
         //c->showPoints();
         //c->write();
-        sendToAllInRoom("SCORES|"+c->name()+"|"+std::to_string(c->points()));
+        sendToAllInRoom("SCORES|"+c->name()+"|"+std::to_string(c->points())+"\n");
     }
 }
 
