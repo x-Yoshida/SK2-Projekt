@@ -9,6 +9,7 @@ Room::Room(std::string name,int maxPlayers,int LastRound): _name(name), _maxPlay
     _currentPlayers=0;
     _finished=0;
     _inGame=false;
+    _Round=0;
     if(_LastRound>5)
     {
         _LastRound=5;
@@ -135,6 +136,7 @@ void Room::startRound(std::string letter)
         std::cout << "START|"+letter+"\n";
         return;
     }
+    std::cout << "END" <<std::endl;
     sendToAllInRoom("END\n");
 }
 
@@ -186,6 +188,8 @@ void Room::submitAnswer(Client* c,std::string &country,std::string &city,std::st
     {
         std::cout << "Scoring" << std::endl;
         scorePlayers();
+        startRound(getRandomLatter());
+        return;
     }
     sendToAllInRoom("THANKS|"+c->name()+"\n");
 }
@@ -307,7 +311,6 @@ void Room::scorePlayers()
         //c->write();
         sendToAllInRoom("SCORES|"+c->name()+"|"+std::to_string(c->points())+"\n");
     }
-    startRound(getRandomLatter());
 }
 
 

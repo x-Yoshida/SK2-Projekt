@@ -130,7 +130,7 @@ void Client::handleEvent(uint32_t events)
                 {
                     Room* newRoom = new Room(msgv[1],std::stoi(msgv[2])); 
                     rooms.insert(newRoom);
-                    joinRoom(newRoom);
+                    //joinRoom(newRoom);
                 }
                 else
                 {
