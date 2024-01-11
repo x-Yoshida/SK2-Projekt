@@ -10,7 +10,7 @@ my_nick = None
 in_room = False
 in_game = False
 letter = ""
-
+sent = False
 
 def send_message(message):
     try:
@@ -77,11 +77,15 @@ class RoomsScreen(QDialog):
         self.update_combobox()
         self.roomSubmitButton.clicked.connect(self.join_room)
         self.roomAddButton.clicked.connect(self.add_room)
+        self.refreshButton.clicked.connect(self.refresh)
 
     def add_room(self):
-            send_message("ROOMS\n\0")  # Dodaj odpowiednie polecenie do serwera
-            new_room = client_socket.recv(1024).decode("utf-8").strip()
-            self.roomComboBox.addItem(new_room)
+        nick = my_nick.strip()
+        send_message("CREATEROOM "+ nick + " 9"+"\n\0")  # Dodaj odpowiednie polecenie do serwera
+        self.update_combobox()
+
+    def refresh(self):
+        self.update_combobox()
 
     def update_combobox(self):
         self.roomComboBox.clear()
@@ -201,12 +205,14 @@ class GameScreen(QDialog):
 
 
         elif message.startswith("START"):
+            global sent
             self.gameButtonStart.setVisible(False)
             letter = message.split("|")[1].strip()
             self.generatedLetter.setText(f"{letter}")
             self.sendButton.setVisible(True)
             self.timer.start(1000)
             self.sendButton.clicked.connect(self.send_answers)
+            sent = False
 
 
 
@@ -217,21 +223,44 @@ class GameScreen(QDialog):
             msg.exec_()
 
         elif message.startswith("THANKS"):
-            self.labelCheckMyScore.setVisible(True)
+            who = message.split("|")[1]
+            if my_nick == who:
+                self.labelCheckMyScore.setVisible(True)
+            else:
+                player_ind, score = current_players[who]
+                self.gameCheck[player_ind].setVisible(True)
 
         elif message.startswith("SCORES"):
             # Assuming SCORES message format is "SCORES|score"
-            score = int(message.split("|")[1])
-            self.gameLabelMyScore.setText(f"{player_nick}: {score}")
+            who = message.split("|")[1]
+            score = int(message.split("|")[2])
+            print(current_players)
+            player_ind, current_points = current_players[who]
+            if my_nick == who:
+                self.gameLabelMyScore.setText(f"{who}: {score}")
+                current_players[who] = [player_ind, score]
+            else:
+                self.gameScores[player_ind].setText(f"{who}: {score}")
+                current_players[who] = [player_ind, score]
             # Enable input fields and Send button for the next round
             self.countryTextEdit.setEnabled(True)
             self.cityTextEdit.setEnabled(True)
             self.nameTextEdit.setEnabled(True)
             self.sendButton.setEnabled(True)
+            self.labelCheckMyScore.setVisible(False)
+            self.gameCheck[1].setVisible(False)
+            self.gameCheck[2].setVisible(False)
+            self.gameCheck[3].setVisible(False)
+            self.gameCheck[4].setVisible(False)
+            self.gameCheck[5].setVisible(False)
+            self.gameCheck[6].setVisible(False)
+            self.gameCheck[7].setVisible(False)
+            self.gameCheck[8].setVisible(False)
 
 
 
     def send_answers(self):
+        global sent
         self.countryTextEdit.setDisabled(True)
         self.cityTextEdit.setDisabled(True)
         self.nameTextEdit.setDisabled(True)
@@ -249,17 +278,21 @@ class GameScreen(QDialog):
 
         print(country,city,name)
         print(f"ANSWERS {country} {city} {name}")
-
+        sent = True
         send_message("ANSWERS "+country.strip()+" "+city.strip()+" "+name.strip()+"\n\0")
 
 
     def update_timer(self):
+        global sent
         self.time_remaining -= 1
         self.timerLabel.setText(f"Time: {self.time_remaining} s")
+        print(sent)
 
-        if self.time_remaining <= 0:
+        if self.time_remaining <= 0 and sent == False:
             self.timer.stop()
             self.send_answers()
+        elif sent == True:
+            self.timer.stop()
 
     def setup_current_players(self):
         global current_players
