@@ -7,6 +7,7 @@ Room::Room(std::string name,int maxPlayers,int LastRound): _name(name), _maxPlay
         l.push_back(i);
     }
     _currentPlayers=0;
+    _finished=0;
     _inGame=false;
     if(_LastRound>5)
     {
@@ -127,6 +128,7 @@ std::string Room::getRandomLatter()
 void Room::startRound(std::string letter)
 {
     _finished=0;
+    _Round++;
     sendToAllInRoom("START|"+letter+"\n");
     std::cout << "START|"+letter+"\n";
 }
@@ -180,6 +182,7 @@ void Room::submitAnswer(Client* c,std::string &country,std::string &city,std::st
         std::cout << "Scoring" << std::endl;
         scorePlayers();
     }
+    sendToAllInRoom("THANKS|"+c->name()+"\n");
 }
 
 //Verry inefficient on memory ngl
@@ -296,7 +299,8 @@ void Room::scorePlayers()
     for(Client * c : players)
     {
         //c->showPoints();
-        c->write("SCORES|"+std::to_string(c->points()));
+        //c->write();
+        sendToAllInRoom("SCORES|"+c->name()+"|"+std::to_string(c->points()));
     }
 }
 
