@@ -127,10 +127,15 @@ std::string Room::getRandomLatter()
 
 void Room::startRound(std::string letter)
 {
-    _finished=0;
-    _Round++;
-    sendToAllInRoom("START|"+letter+"\n");
-    std::cout << "START|"+letter+"\n";
+    if(_Round<_LastRound)
+    {
+        _finished=0;
+        _Round++;
+        sendToAllInRoom("START|"+letter+"\n");
+        std::cout << "START|"+letter+"\n";
+        return;
+    }
+    sendToAllInRoom("END\n");
 }
 
 void Room::startGame()
@@ -302,6 +307,7 @@ void Room::scorePlayers()
         //c->write();
         sendToAllInRoom("SCORES|"+c->name()+"|"+std::to_string(c->points())+"\n");
     }
+    startRound(getRandomLatter());
 }
 
 
