@@ -136,6 +136,11 @@ void Client::handleEvent(uint32_t events)
 
             if(!strcmp(msgv[0].c_str(),"START"))
             {
+                if((_room->currentPlayers())<2)
+                {
+                    write("ATLEAST2PLAYERS\n");
+                    return;
+                }
                 _room->startGame();
             }
 
