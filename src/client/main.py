@@ -168,7 +168,7 @@ class GameScreen(QDialog):
         self.labelCheck7.setVisible(False)
         self.labelCheck8.setVisible(False)
         self.sendButton.setVisible(False)
-
+        self.sendButton.clicked.connect(self.send_answers)
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_timer)
         self.time_remaining = 20  # Ustaw czas początkowy
@@ -206,13 +206,21 @@ class GameScreen(QDialog):
 
         elif message.startswith("START"):
             global sent
+            self.labelCheckMyScore.setVisible(False)
+            self.gameCheck[1].setVisible(False)
+            self.gameCheck[2].setVisible(False)
+            self.gameCheck[3].setVisible(False)
+            self.gameCheck[4].setVisible(False)
+            self.gameCheck[5].setVisible(False)
+            self.gameCheck[6].setVisible(False)
+            self.gameCheck[7].setVisible(False)
+            self.gameCheck[8].setVisible(False)
             self.gameButtonStart.setVisible(False)
             letter = message.split("|")[1].strip()
             self.generatedLetter.setText(f"{letter}")
             self.sendButton.setVisible(True)
             self.time_remaining = 20
             self.timer.start(1000)
-            self.sendButton.clicked.connect(self.send_answers)
             sent = False
 
 
@@ -232,7 +240,6 @@ class GameScreen(QDialog):
                 self.gameCheck[player_ind].setVisible(True)
 
         elif message.startswith("SCORES"):
-            # Assuming SCORES message format is "SCORES|score"
             who = message.split("|")[1]
             score = int(message.split("|")[2])
             print(current_players)
@@ -243,11 +250,22 @@ class GameScreen(QDialog):
             else:
                 self.gameScores[player_ind].setText(f"{who}: {score}")
                 current_players[who] = [player_ind, score]
-            # Enable input fields and Send button for the next round
+
             self.countryTextEdit.setEnabled(True)
             self.cityTextEdit.setEnabled(True)
             self.nameTextEdit.setEnabled(True)
             self.sendButton.setEnabled(True)
+
+
+        elif message.startswith("END"):
+            msg = QMessageBox()
+            msg.setWindowTitle("!!")
+            msg.setText("Koniec gry, jesli chcesz zagrac ponownie dolacz do nowego pokoju!")
+            msg.exec_()
+            self.countryTextEdit.setEnabled(False)
+            self.cityTextEdit.setEnabled(False)
+            self.nameTextEdit.setEnabled(False)
+            self.sendButton.setEnabled(False)
             self.labelCheckMyScore.setVisible(False)
             self.gameCheck[1].setVisible(False)
             self.gameCheck[2].setVisible(False)
@@ -257,12 +275,6 @@ class GameScreen(QDialog):
             self.gameCheck[6].setVisible(False)
             self.gameCheck[7].setVisible(False)
             self.gameCheck[8].setVisible(False)
-
-        elif message.startswith("END"):
-            msg = QMessageBox()
-            msg.setWindowTitle("!!")
-            msg.setText("Koniec gry, jesli chcesz zagrac ponownie dolacz do nowego pokoju!")
-            msg.exec_()
 
 
 
@@ -309,14 +321,14 @@ class GameScreen(QDialog):
 
     def update_current_players(self, player):
         global players_count
-        player_ind, _, _ = current_players[player]
+        player_ind, _ = current_players[player]
         for key, value in current_players.items():
             self.gameScores[value[0]].setVisible(False)
         del current_players[player]
         players_count -= 1
         for key, value in current_players.items():
             if value[0] > player_ind:
-                current_players[key] = [value[0]-1, value[1], value[2]]
+                current_players[key] = [value[0]-1, value[1]]
         self.setup_current_players()
 
     def display_start(self):
