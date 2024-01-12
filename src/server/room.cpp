@@ -21,6 +21,11 @@ Room::Room()
 
 }
 
+Room::~Room()
+{
+    players.clear();
+}
+
 std::string Room::name()
 {
     return _name;
@@ -51,6 +56,7 @@ void Room::listPlayers()
 
 void Room::removePlayer(Client* c)
 {
+    sendToAllInRoomBut(c,"LEFT|"+c->name()+"\n");
     players.erase(c);
     _currentPlayers--;
 }
@@ -109,6 +115,7 @@ void Room::sendToAllInRoomBut(Client* player, std::string msg)
 
 void Room::sendToAllInRoom(std::string msg)
 {
+    std::cout << msg;
     for(Client* p : players)
     {
         p->write(msg);
@@ -124,6 +131,7 @@ std::string Room::getRandomLatter()
     _letter = l[i];
     l.erase(l.begin()+i);
     return _letter;
+    //delete this;
 }
 
 void Room::startRound(std::string letter)
@@ -136,8 +144,8 @@ void Room::startRound(std::string letter)
         std::cout << "START|"+letter+"\n";
         return;
     }
-    std::cout << "END" <<std::endl;
     sendToAllInRoom("END\n");
+    rooms.erase(this);
 }
 
 void Room::startGame()
@@ -184,6 +192,10 @@ void Room::submitAnswer(Client* c,std::string &country,std::string &city,std::st
     answers.city[city].push_back(c);
     answers.name[name].push_back(c);
     _finished++;
+    if(_finished==1)
+    {
+        sendToAllInRoomBut(c,"STOP\n");
+    }
     sendToAllInRoom("THANKS|"+c->name()+"\n");
     if(_finished==players.size())
     {

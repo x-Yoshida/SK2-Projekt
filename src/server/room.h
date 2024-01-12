@@ -38,6 +38,7 @@ class Room
     public:
         Room();
         Room(std::string name,int maxPlayers=4,int LastRound=4);
+        ~Room();
         std::string name();
         bool inGame();
         int maxPlayers();

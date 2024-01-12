@@ -64,6 +64,7 @@ class Client : public Handler
         void timeoutCounterUp();
         int getTimeoutCounter();
         //void write(char * buffer, int count);
+        bool nickTaken(std::string &nick);
         void write(std::string msg);
         void remove();
         void joinRoom(Room* room);
