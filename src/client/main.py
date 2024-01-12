@@ -210,6 +210,7 @@ class GameScreen(QDialog):
             letter = message.split("|")[1].strip()
             self.generatedLetter.setText(f"{letter}")
             self.sendButton.setVisible(True)
+            self.time_remaining = 20
             self.timer.start(1000)
             self.sendButton.clicked.connect(self.send_answers)
             sent = False
@@ -257,6 +258,12 @@ class GameScreen(QDialog):
             self.gameCheck[7].setVisible(False)
             self.gameCheck[8].setVisible(False)
 
+        elif message.startswith("END"):
+            msg = QMessageBox()
+            msg.setWindowTitle("!!")
+            msg.setText("Koniec gry, jesli chcesz zagrac ponownie dolacz do nowego pokoju!")
+            msg.exec_()
+
 
 
     def send_answers(self):
@@ -286,7 +293,6 @@ class GameScreen(QDialog):
         global sent
         self.time_remaining -= 1
         self.timerLabel.setText(f"Time: {self.time_remaining} s")
-        print(sent)
 
         if self.time_remaining <= 0 and sent == False:
             self.timer.stop()
