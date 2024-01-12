@@ -65,6 +65,7 @@ void Room::removePlayer(Client* c)
         {
             p->write("END\n");
         }
+        rooms.erase(this);
     }
 }
 
