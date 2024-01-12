@@ -102,15 +102,16 @@ void Room::join(Client* c)
         ss<<p->name()<<"|";
     }
     ss<<"\n";
+    if(_inGame)
+    {
+        ss << "INGAME\n";
+        //std::cout << "INGAME\n";
+    }
     tmp = ss.str();
     std::cout << tmp<<std::endl;
     c->write(tmp);
     players.insert(c);
     _currentPlayers++;
-    if(_inGame)
-    {
-        c->write("INGAME\n");
-    }
 }
 
 void Room::sendToAllInRoomBut(Client* player, std::string msg)
