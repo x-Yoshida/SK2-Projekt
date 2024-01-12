@@ -19,6 +19,12 @@ std::vector<std::string> splitBy(char* line,char sep,char end)
         }
         res.push_back(tmp);
     }
+    
+    if(res.size()==0)
+    {
+        res.push_back("");
+    }
+
     return res;
 }
 
@@ -81,13 +87,26 @@ void Client::handleEvent(uint32_t events)
 
             if(!strcmp(msgv[0].c_str(),"SETNICK"))
             {
-                int i=1;
+                //int i=1;
+                std::string name="";
+                if(msgv.size()>2)
+                {
+                    write("NOSPACE\n");
+                }
+                /*
                 for(i;i<msgv.size()-1;i++)
                 {
-                    _name+=msgv[i]+" ";
+                    name+=msgv[i]+"_";
                 }
-                _name+=msgv[i];
-                write("NICKACCEPTED");
+                */
+                name+=msgv[1];
+                if(nickTaken(name))
+                {
+                    write("NICKTAKEN\n");
+                    return;
+                }
+                _name=name;
+                write("NICKACCEPTED\n");
             }
             if(!strcmp(msgv[0].c_str(),"ROOMS"))
             {
@@ -112,6 +131,7 @@ void Client::handleEvent(uint32_t events)
                         r->join(this);
                     }
                 }
+                write("FAILED\n");
             }
 
             if(!strcmp(msgv[0].c_str(),"START"))
@@ -149,6 +169,18 @@ void Client::handleEvent(uint32_t events)
     }
 }
 
+bool Client::nickTaken(std::string &nick)
+{
+    for(Client * c : clients)
+    {
+        if(c->name()==nick)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void Client::timeoutCounterUp()
 {
     _timeoutCounter++;
@@ -176,7 +208,10 @@ void Client::remove()
 {
     printf("removing %d\n", _fd);
     clients.erase(this);
-    _room->removePlayer(this);
+    if(_room!=&dummy)
+    {
+        _room->removePlayer(this);
+    }
     delete this;
 }
 
