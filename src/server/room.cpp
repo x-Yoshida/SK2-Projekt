@@ -59,6 +59,13 @@ void Room::removePlayer(Client* c)
     sendToAllInRoomBut(c,"LEFT|"+c->name()+"\n");
     players.erase(c);
     _currentPlayers--;
+    if(_inGame && _currentPlayers==1)
+    {
+        for(Client* p : players)
+        {
+            p->write("END\n");
+        }
+    }
 }
 
 void Room::sendCurrentPlayers(Client* c)
@@ -99,6 +106,10 @@ void Room::join(Client* c)
     c->write(tmp);
     players.insert(c);
     _currentPlayers++;
+    if(_inGame)
+    {
+        c->write("INGAME\n");
+    }
 }
 
 void Room::sendToAllInRoomBut(Client* player, std::string msg)
