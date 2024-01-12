@@ -56,6 +56,8 @@ class NickScreen(QDialog):
                     if len(status) > 0:
                         if status == "NICKTAKEN":
                             self.nickErrorLabel.setText(f"Nick: [{my_nick}] jest już zajęty!")
+                        elif status == "NOSPACE":
+                            self.nickErrorLabel.setText(f"W nicku nie moga byc spacje!")
                         else:
                             rooms = RoomsScreen()
                             widget.addWidget(rooms)
@@ -81,7 +83,7 @@ class RoomsScreen(QDialog):
 
     def add_room(self):
         nick = my_nick.strip()
-        send_message("CREATEROOM "+ nick + " 9"+"\n\0")  # Dodaj odpowiednie polecenie do serwera
+        send_message("CREATEROOM "+ nick + " 9"+"\n\0")
         self.update_combobox()
 
     def refresh(self):
@@ -171,7 +173,7 @@ class GameScreen(QDialog):
         self.sendButton.clicked.connect(self.send_answers)
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_timer)
-        self.time_remaining = 20  # Ustaw czas początkowy
+        self.time_remaining = 60  # Ustaw czas początkowy
 
 
         self.timerLabel = self.gameTimerLabel
@@ -202,7 +204,12 @@ class GameScreen(QDialog):
             msg.setText("Do rozpoczęcia rozgrywki potrzeba minimum 2 graczy!")
             msg.exec_()
 
-
+        elif message.startswith("INGAME"):
+            self.gameButtonStart.setVisible(False)
+            msg = QMessageBox()
+            msg.setWindowTitle("Uwaga")
+            msg.setText("Poczekaj na kolejna runde!")
+            msg.exec_()
 
         elif message.startswith("START"):
             global sent
@@ -219,9 +226,12 @@ class GameScreen(QDialog):
             letter = message.split("|")[1].strip()
             self.generatedLetter.setText(f"{letter}")
             self.sendButton.setVisible(True)
-            self.time_remaining = 20
+            self.time_remaining = 60
             self.timer.start(1000)
             sent = False
+
+        elif message.startswith("STOP"):
+            self.ten_timer()
 
 
 
@@ -256,12 +266,18 @@ class GameScreen(QDialog):
             self.nameTextEdit.setEnabled(True)
             self.sendButton.setEnabled(True)
 
+        elif message.startswith("LEFT"):
+            player = message.split("|")[1]
+            player_ind, _= current_players[player]
+            self.update_current_players(player)
+
 
         elif message.startswith("END"):
             msg = QMessageBox()
             msg.setWindowTitle("!!")
             msg.setText("Koniec gry, jesli chcesz zagrac ponownie dolacz do nowego pokoju!")
             msg.exec_()
+            self.timer.stop()
             self.countryTextEdit.setEnabled(False)
             self.cityTextEdit.setEnabled(False)
             self.nameTextEdit.setEnabled(False)
@@ -275,6 +291,7 @@ class GameScreen(QDialog):
             self.gameCheck[6].setVisible(False)
             self.gameCheck[7].setVisible(False)
             self.gameCheck[8].setVisible(False)
+            self.leave()
 
 
 
@@ -300,6 +317,9 @@ class GameScreen(QDialog):
         sent = True
         send_message("ANSWERS "+country.strip()+" "+city.strip()+" "+name.strip()+"\n\0")
 
+    def ten_timer(self):
+        if self.time_remaining > 10:
+           self.time_remaining = 10
 
     def update_timer(self):
         global sent
@@ -349,7 +369,10 @@ class GameScreen(QDialog):
         self.server_thread.terminate()
         self.hide()
         widget.removeWidget(self)
+        lobby_screen = widget.widget(1)
+        lobby_screen.update_combobox()
         widget.setCurrentIndex(widget.currentIndex())
+
 
 
 
