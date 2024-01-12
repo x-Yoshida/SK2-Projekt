@@ -92,6 +92,7 @@ void Client::handleEvent(uint32_t events)
                 if(msgv.size()>2)
                 {
                     write("NOSPACE\n");
+                    return;
                 }
                 /*
                 for(i;i<msgv.size()-1;i++)
@@ -223,6 +224,7 @@ void Client::remove()
 void Client::joinRoom(Room* room)
 {
     _room=room;
+    clearPoints();
 }
 
 void Client::leaveRoom()
