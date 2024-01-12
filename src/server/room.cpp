@@ -184,14 +184,19 @@ void Room::submitAnswer(Client* c,std::string &country,std::string &city,std::st
     answers.city[city].push_back(c);
     answers.name[name].push_back(c);
     _finished++;
+    sendToAllInRoom("THANKS|"+c->name()+"\n");
     if(_finished==players.size())
     {
         std::cout << "Scoring" << std::endl;
         scorePlayers();
         startRound(getRandomLatter());
-        return;
+        _finished = 0;;
     }
-    sendToAllInRoom("THANKS|"+c->name()+"\n");
+    else
+    {
+        std::cout << "Waiting for more answers..." << std::endl;
+    }
+
 }
 
 //Verry inefficient on memory ngl
