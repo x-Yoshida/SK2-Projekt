@@ -96,17 +96,18 @@ void Room::join(Client* c)
     std::string tmp = ss.str();
     std::cout << tmp<<std::endl;
     sendToAllInRoomBut(c,tmp);
+    if(_inGame)
+    {
+        ss << "INGAME\n";
+        //std::cout << "INGAME\n";
+    }
     ss<<"CURRENTPLAYERS|";
     for(Client* p : players)
     {
         ss<<p->name()<<"|";
     }
     ss<<"\n";
-    if(_inGame)
-    {
-        ss << "INGAME\n";
-        //std::cout << "INGAME\n";
-    }
+
     tmp = ss.str();
     std::cout << tmp<<std::endl;
     c->write(tmp);
