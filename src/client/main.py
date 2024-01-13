@@ -11,6 +11,7 @@ in_room = False
 in_game = False
 letter = ""
 sent = False
+ingameorno = False
 
 def send_message(message):
     try:
@@ -100,6 +101,7 @@ class RoomsScreen(QDialog):
         global in_room
         global players_count
         global current_players
+        global ingameorno
         chosen_room = self.roomComboBox.currentText().split("|")[0]
         send_message("JOIN " + chosen_room+"\n\0")
         status = client_socket.recv(1024).decode("utf-8").strip().split()
@@ -114,10 +116,15 @@ class RoomsScreen(QDialog):
             if stat == "JOINED|" + my_nick:
                 in_room = True
                 current_players[my_nick] = [0, 0]
+
+            if stat == "INGAME":
+                ingameorno = True
+
             if stat.startswith("CURRENTPLAYERS"):
                 for player in stat.split("|")[1:-1]:
                     players_count += 1
                     current_players[player] = [players_count, 0]
+
                 if in_room:
                     game = GameScreen()
                     widget.addWidget(game)
@@ -128,6 +135,7 @@ class GameScreen(QDialog):
     def __init__(self):
         super(GameScreen, self).__init__()
         loadUi("game.ui", self)
+        global ingameorno
         self.server_thread = ServerThread()
         self.server_thread.new_message.connect(self.update_screen)
         self.server_thread.start()
@@ -179,11 +187,18 @@ class GameScreen(QDialog):
         self.timerLabel = self.gameTimerLabel
         self.timerLabel.setText(f"Time: {self.time_remaining} s")
 
+        print(ingameorno)
+        if ingameorno == True:
+            self.gameButtonStart.setVisible(False)
+            self.send_answers()
+
+
 
 
     def update_screen(self, message):
         global letter
         global players_count
+
 
         if message.startswith("JOINED"):
             players_count += 1
@@ -191,6 +206,7 @@ class GameScreen(QDialog):
             current_players[player_nick] = [players_count, 0]
             self.gameScores[players_count].setText(f"{player_nick}: 0")
             self.gameScores[players_count].setVisible(True)
+
 
         elif message.startswith("CURRENTPLAYERS"):
             for player in message.split("|")[1:-1]:
@@ -202,13 +218,6 @@ class GameScreen(QDialog):
             msg = QMessageBox()
             msg.setWindowTitle("Błąd!")
             msg.setText("Do rozpoczęcia rozgrywki potrzeba minimum 2 graczy!")
-            msg.exec_()
-
-        elif message.startswith("INGAME"):
-            self.gameButtonStart.setVisible(False)
-            msg = QMessageBox()
-            msg.setWindowTitle("Uwaga")
-            msg.setText("Poczekaj na kolejna runde!")
             msg.exec_()
 
         elif message.startswith("START"):
@@ -229,6 +238,7 @@ class GameScreen(QDialog):
             self.time_remaining = 60
             self.timer.start(1000)
             sent = False
+            ingameorno = False
 
         elif message.startswith("STOP"):
             self.ten_timer()
