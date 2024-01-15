@@ -105,6 +105,7 @@ void Room::join(Client* c)
     if(_inGame)
     {
         ss << "INGAME\n";
+        _finished++;
         //std::cout << "INGAME\n";
     }
     tmp = ss.str();
