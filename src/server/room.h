@@ -4,7 +4,9 @@
 #include <random>
 #include <fstream>
 #include <algorithm>
+
 #include "handler.h"
+#include "timer.h"
 
 #ifndef BUFFER_SIZE
 #define BUFFER_SIZE 1024
@@ -36,6 +38,7 @@ class Room
     std::unordered_set<Client*> players;
     Answers answers;
     public:
+        Timer timer;
         Room();
         Room(std::string name,int maxPlayers=4,int LastRound=4);
         ~Room();

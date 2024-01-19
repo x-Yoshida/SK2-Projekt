@@ -4,7 +4,8 @@ pthread_t connt;
 bool done = false;
 int main(int argc,char** argv)
 {
-
+    Timer t;
+    t.startTimer(500);
     if(findInCSV("names.csv","Norbert"))
     {
         std::cout<<"fafawf"<<std::endl;

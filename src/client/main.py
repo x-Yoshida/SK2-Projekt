@@ -190,7 +190,7 @@ class GameScreen(QDialog):
         print(ingameorno)
         if ingameorno == True:
             self.gameButtonStart.setVisible(False)
-            self.send_answers()
+            #self.send_answers()
 
 
 

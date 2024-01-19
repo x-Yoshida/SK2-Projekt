@@ -1,6 +1,6 @@
 #include "room.h"
 
-Room::Room(std::string name,int maxPlayers,int LastRound): _name(name), _maxPlayers(maxPlayers), _LastRound(LastRound)
+Room::Room(std::string name,int maxPlayers,int LastRound): _name(name), _maxPlayers(maxPlayers), _LastRound(LastRound),timer(this)
 {
     for(int i=65;i<=90;i++)
     {
@@ -16,6 +16,7 @@ Room::Room(std::string name,int maxPlayers,int LastRound): _name(name), _maxPlay
     }
     players={};
 }
+
 Room::Room()
 {
 
@@ -24,6 +25,8 @@ Room::Room()
 Room::~Room()
 {
     players.clear();
+    timer.running=false;
+    timer.~Timer();
 }
 
 std::string Room::name()
@@ -111,6 +114,9 @@ void Room::join(Client* c)
     {
         ss << "INGAME\n";
         _finished++;
+        answers.country["yyy"].push_back(c);
+        answers.city["yyy"].push_back(c);
+        answers.name["yyy"].push_back(c);
         //std::cout << "INGAME\n";
     }
     tmp = ss.str();
@@ -161,6 +167,7 @@ void Room::startRound(std::string letter)
         _Round++;
         sendToAllInRoom("START|"+letter+"\n");
         std::cout << "START|"+letter+"\n";
+        timer.startTimer(60000);
         return;
     }
     sendToAllInRoom("END\n");
